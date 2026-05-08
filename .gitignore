@@ -1,0 +1,5 @@
+.pnpm-store
+dist
+node_modules
+
+devcontainer-lock.json

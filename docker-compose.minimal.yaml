@@ -1,0 +1,14 @@
+version: '3.9'
+services:
+  wordpress:
+    image: healthy-wordpress:minimal
+    build:
+      args:
+        WP_VERSION: "6.0"
+        PHP_VERSION: ${PHP_VERSION:-7.4}
+  db:
+    volumes:
+      - healthy_db_data_minimal:/var/lib/mysql
+
+volumes:
+  healthy_db_data_minimal:

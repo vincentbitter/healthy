@@ -1,0 +1,31 @@
+{
+    "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
+    "name": "Codespaces Latest",
+    "build": {
+        "dockerfile": "../codespaces.Dockerfile",
+        "args": {
+            "WP_VERSION": "latest",
+            "PHP_VERSION": "8"
+        }
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/node:2.0.0": {
+            "version": "26",
+            "pnpm": "true"
+        }
+    },
+    "forwardPorts": [
+        8080
+    ],
+    "postCreateCommand": "pnpm install && pnpm build && wp core install --allow-root --path=/var/www/html --url=\"http://localhost:8080\" --title=Healthy --admin_user=admin --admin_password=admin --admin_email=admin@example.com && chown -R www-data:www-data /var/www/html/wp-content && chmod -R 775 /var/www/html/wp-content && ln -sfn \"$(pwd)/dist\" /var/www/html/wp-content/plugins/healthy",
+    "postStartCommand": "wp plugin is-installed plugin-check --allow-root --path=/var/www/html || wp plugin install plugin-check --activate --allow-root --path=/var/www/html && apache2ctl -D FOREGROUND",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "bmewburn.vscode-intelephense-client",
+                "xdebug.php-debug",
+                "ms-azuretools.vscode-docker"
+            ]
+        }
+    }
+}

@@ -1,0 +1,38 @@
+version: '3.9'
+
+services:
+  wordpress:
+    image: healthy-wordpress:latest
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+      args:
+        WP_VERSION: ${WORDPRESS_VERSION:-latest}
+        PHP_VERSION: ${PHP_VERSION:-8}
+        WORDPRESS_DB_HOST: db
+        WORDPRESS_DB_USER: wp
+        WORDPRESS_DB_PASSWORD: wp
+        WORDPRESS_DB_NAME: wp
+    container_name: healthy_wp
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/workspace:cached
+      - ./dist:/var/www/html/wp-content/plugins/healthy
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:latest
+    container_name: healthy_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: wp
+      MYSQL_USER: wp
+      MYSQL_PASSWORD: wp
+    volumes:
+      - healthy_db_data:/var/lib/mysql
+
+volumes:
+  healthy_db_data:
