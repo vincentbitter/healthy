@@ -58,7 +58,6 @@ RUN mkdir -p /var/www/html/wp-content/database \
     && chown -R www-data:www-data /var/www/html/wp-content
 
 # Wordpress config
-#RUN cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
 RUN wp config create \
     --dbname=wp \
     --dbuser=wp \
@@ -67,3 +66,8 @@ RUN wp config create \
     --path=/var/www/html \
     --allow-root \
     --skip-check
+
+RUN sed -i "1i\\
+if (isset(\$_SERVER['HTTP_X_FORWARDED_PROTO']) && \$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') { \\
+    \$_SERVER['HTTPS'] = 'on'; \\
+}" /var/www/html/wp-config.php
