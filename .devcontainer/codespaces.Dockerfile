@@ -67,7 +67,7 @@ RUN wp config create \
     --allow-root \
     --skip-check
 
-RUN sed -i "1i\\
-if (isset(\$_SERVER['HTTP_X_FORWARDED_PROTO']) && \$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') { \\
-    \$_SERVER['HTTPS'] = 'on'; \\
-}" /var/www/html/wp-config.php
+RUN sed -i '/\/\* Add any custom values between this line and the "stop editing" line\. \*\//a \
+if (isset($_SERVER["HTTP_X_FORWARDED_PROTO"]) && $_SERVER["HTTP_X_FORWARDED_PROTO"] === "https") { \
+    $_SERVER["HTTPS"] = "on"; \
+}' /var/www/html/wp-config.php
