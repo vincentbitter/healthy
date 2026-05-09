@@ -17,7 +17,7 @@
     "forwardPorts": [
         8080
     ],
-    "postCreateCommand": "pnpm install && pnpm build && wp core install --allow-root --path=/var/www/html --url=\"https://${CODESPACE_NAME}-8080.app.github.dev\" --title=Healthy --admin_user=admin --admin_password=admin --admin_email=admin@example.com && chown -R www-data:www-data /var/www/html/wp-content && chmod -R 775 /var/www/html/wp-content && ln -sfn \"$(pwd)/dist\" /var/www/html/wp-content/plugins/healthy",
+    "postCreateCommand": "pnpm install && pnpm build && wp core install --allow-root --path=/var/www/html --url=\"https://${CODESPACE_NAME}-8080.app.github.dev\" --title=Healthy --admin_user=admin --admin_password=admin --admin_email=admin@example.com && ln -sfn \"$(pwd)/dist\" /var/www/html/wp-content/plugins/healthy",
     "postStartCommand": "wp plugin is-installed plugin-check --allow-root --path=/var/www/html || wp plugin install plugin-check --activate --allow-root --path=/var/www/html && apache2ctl -D FOREGROUND",
     "customizations": {
         "vscode": {
