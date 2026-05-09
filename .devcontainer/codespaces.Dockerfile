@@ -1,12 +1,6 @@
 ARG PHP_VERSION=7.4
 FROM mcr.microsoft.com/devcontainers/php:${PHP_VERSION}
 
-# Fix port
-#RUN sed -i 's/80/8080/g' /etc/apache2/ports.conf \
-#    && sed -i 's/:80/:8080/g' /etc/apache2/sites-enabled/000-default.conf
-
-#EXPOSE 8080
-
 # Dependencies
 RUN apt-get update && apt-get install -y unzip
 
@@ -24,17 +18,6 @@ RUN apt-get update && apt-get install -y \
     openssh-client \
     curl \
     ca-certificates
-
-# Xdebug
-# RUN if [ "$(php -r 'echo PHP_MAJOR_VERSION;')" -lt "8" ]; then \
-#     pecl install xdebug-3.1.6 && docker-php-ext-enable xdebug; \
-#     elif [ "$(php -r 'echo PHP_MAJOR_VERSION;')" = "8" ] && [ "$(php -r 'echo PHP_MINOR_VERSION;')" -lt "3" ]; then \
-#     pecl install xdebug-3.2.2 && docker-php-ext-enable xdebug; \
-#     else \
-#     pecl install xdebug && docker-php-ext-enable xdebug; \
-#     fi
-
-COPY xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
 # Wordpress
 ARG WP_VERSION=6.0
@@ -66,6 +49,23 @@ RUN wp config create \
     --allow-root \
     --skip-check
 
+RUN sed -i '/\/\* Add any custom values between this line and the "stop editing" line\. \*\//a \
+\
+if (!empty($_SERVER["HTTP_X_FORWARDED_HOST"])) { \
+    $_SERVER["HTTP_HOST"] = $_SERVER["HTTP_X_FORWARDED_HOST"]; \
+} \
+\
+if (!empty($_SERVER["HTTP_X_FORWARDED_PROTO"]) && $_SERVER["HTTP_X_FORWARDED_PROTO"] === "https") { \
+    $_SERVER["HTTPS"] = "on"; \
+    $_SERVER["SERVER_PORT"] = $_SERVER["HTTP_X_FORWARDED_PORT"] ?? 443; \
+    $_SERVER["REQUEST_SCHEME"] = "https"; \
+} \
+' /var/www/html/wp-config.php
+
+
 # Permissions
-RUN chown -R vscode:vscode /var/www/html \
+RUN usermod -u 1001 vscode && groupmod -g 1001 vscode \
+    && usermod -u 1000 www-data && groupmod -g 1000 www-data
+
+RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/wp-content
