@@ -1,0 +1,13 @@
+{
+    "name": "vincentbitter/healthy",
+    "description": "Health endpoint plugin for WordPress",
+    "type": "wordpress-plugin",
+    "autoload": {
+        "psr-4": {
+            "Healthy\\": "lib/"
+        }
+    },
+    "require-dev": {
+        "php-stubs/wordpress-stubs": "^6.0"
+    }
+}

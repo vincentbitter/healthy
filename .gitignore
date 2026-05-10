@@ -1,5 +1,6 @@
 .pnpm-store
 dist
 node_modules
+vendor
 
 devcontainer-lock.json

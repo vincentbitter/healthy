@@ -2,7 +2,11 @@ ARG PHP_VERSION=7.4
 FROM mcr.microsoft.com/devcontainers/php:${PHP_VERSION}
 
 # Dependencies
-RUN apt-get update && apt-get install -y unzip
+RUN apt-get update && apt-get install -y \
+    openssh-client \
+    curl \
+    ca-certificates \
+    unzip
 
 RUN apt-get update && apt-get install -y curl \
     && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
@@ -13,11 +17,7 @@ RUN apt-get update && apt-get install -y curl \
     && apt-get update \
     && apt-get install -y git
 
-
-RUN apt-get update && apt-get install -y \
-    openssh-client \
-    curl \
-    ca-certificates
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Wordpress
 ARG WP_VERSION=6.0
