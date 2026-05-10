@@ -1,6 +1,6 @@
 {
     "name": "vincentbitter/healthy",
-    "description": "Health endpoint plugin for WordPress",
+    "description": "Healthy plugin for WordPress",
     "type": "wordpress-plugin",
     "autoload": {
         "psr-4": {
