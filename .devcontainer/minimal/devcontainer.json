@@ -17,8 +17,7 @@
         8080
     ],
     "remoteEnv": {
-        "SITE_NAME": "Healthy",
-        "SITE_URL": "http://localhost:8080"
+        "SITE_NAME": "Healthy"
     },
     "postCreateCommand": "bash .devcontainer/scripts/post-create.sh",
     "postStartCommand": "bash .devcontainer/scripts/post-start.sh",

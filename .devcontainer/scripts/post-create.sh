@@ -13,6 +13,11 @@ fi
 
 # Install WordPress
 echo "Installing WordPress..."
+if [ -n "$CODESPACE_NAME" ]; then
+    SITE_URL="https://${CODESPACE_NAME}-8080.app.github.dev"
+else
+    SITE_URL="http://localhost:8080"
+fi
 wp core install --allow-root \
   --path=/var/www/html \
   --url="$SITE_URL" \
