@@ -13,8 +13,12 @@
     "forwardPorts": [
         8080
     ],
-    "postCreateCommand": "pnpm install && pnpm build && wp core install --allow-root --path=/var/www/html --url=\"http://localhost:8080\" --title=Healthy --admin_user=admin --admin_password=admin --admin_email=admin@example.com && wp plugin install plugin-check --activate --allow-root --path=/var/www/html",
-    "postStartCommand": "wp plugin is-installed plugin-check --allow-root --path=/var/www/html || wp plugin install plugin-check --activate --allow-root --path=/var/www/html",
+    "remoteEnv": {
+        "SITE_NAME": "Healthy",
+        "SITE_URL": "http://localhost:8080"
+    },
+    "postCreateCommand": "bash .devcontainer/scripts/post-create.sh",
+    "postStartCommand": "bash .devcontainer/scripts/post-start.sh",
     "customizations": {
         "vscode": {
             "extensions": [

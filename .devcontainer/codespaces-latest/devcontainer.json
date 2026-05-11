@@ -17,8 +17,12 @@
     "forwardPorts": [
         8080
     ],
-    "postCreateCommand": "pnpm install && pnpm build && sudo wp core install --allow-root --path=/var/www/html --url=\"https://${CODESPACE_NAME}-8080.app.github.dev\" --title=Healthy --admin_user=admin --admin_password=admin --admin_email=admin@example.com && sudo chown -R www-data:www-data /var/www/html && sudo ln -sfn \"$(pwd)/dist\" /var/www/html/wp-content/plugins/healthy",
-    "postStartCommand": "chmod +x .devcontainer/codespaces.sh && .devcontainer/codespaces.sh && sudo wp plugin is-installed plugin-check --allow-root --path=/var/www/html || sudo wp plugin install plugin-check --activate --allow-root --path=/var/www/html && sudo apache2ctl -D FOREGROUND",
+    "remoteEnv": {
+        "SITE_NAME": "Healthy",
+        "SITE_URL": "https://${CODESPACE_NAME}-8080.app.github.dev"
+    },
+    "postCreateCommand": "sudo bash .devcontainer/scripts/post-create.sh",
+    "postStartCommand": "bash .devcontainer/scripts/post-start.sh && sudo apache2ctl start",
     "customizations": {
         "vscode": {
             "extensions": [

@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install -y \
     openssh-client \
     curl \
     ca-certificates \
-    unzip
+    unzip \
+    default-mysql-client
 
 RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
     | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
