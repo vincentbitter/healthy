@@ -3,6 +3,7 @@ import chokidar from 'chokidar';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { exec } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -49,6 +50,16 @@ function cleanDist() {
 
 cleanDist();
 
+// Create new autoload files
+function dumpAutoload() {
+  exec('composer dump-autoload -o', { cwd: srcDir }, (err, stdout, stderr) => {
+    if (err) console.error(stderr);
+    else console.log("Composer autoload updated");
+  });
+}
+
+dumpAutoload();
+
 // Copy PHP files
 function copyPHP() {
     function copyRecursive(dir) {
@@ -82,6 +93,7 @@ copyPHP();
 
 // Watch PHP files
 function watchPHP() {
+    const debouncedDumpAutoload = debounce(dumpAutoload, 100);
     const debouncedCopy = debounce(copyPHP, 200);
     chokidar.watch(srcDir, {
         ignoreInitial: true,
@@ -91,18 +103,24 @@ function watchPHP() {
         .on('change', file => {
             if (file.endsWith('.php')) {
                 console.log(`PHP changed: ${file}`);
+                if (file.startsWith(srcDir + "/lib/"))
+                    debouncedDumpAutoload();
                 debouncedCopy();
             }
         })
         .on('add', file => {
             if (file.endsWith('.php')) {
                 console.log(`PHP added: ${file}`);
+                if (file.startsWith(srcDir + "/lib/"))
+                    debouncedDumpAutoload();
                 debouncedCopy();
             }
         })
         .on('unlink', file => {
             if (file.endsWith('.php')) {
                 console.log(`PHP removed: ${file}`);
+                if (file.startsWith(srcDir + "/lib/"))
+                    debouncedDumpAutoload();
                 removeFromDist(file);
             }
         });
