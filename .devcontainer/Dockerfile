@@ -1,5 +1,8 @@
 ARG PHP_VERSION=7.4
-FROM php:${PHP_VERSION}-apache
+FROM mcr.microsoft.com/devcontainers/php:${PHP_VERSION}
+
+# Fix user
+# RUN usermod -u 1000 www-data && groupmod -g 1000 www-data
 
 # Dependencies
 RUN docker-php-ext-install mysqli
@@ -22,15 +25,15 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Xdebug
-RUN if [ "$(php -r 'echo PHP_MAJOR_VERSION;')" -lt "8" ]; then \
-    pecl install xdebug-3.1.6 && docker-php-ext-enable xdebug; \
-    elif [ "$(php -r 'echo PHP_MAJOR_VERSION;')" = "8" ] && [ "$(php -r 'echo PHP_MINOR_VERSION;')" -lt "3" ]; then \
-    pecl install xdebug-3.2.2 && docker-php-ext-enable xdebug; \
-    else \
-    pecl install xdebug && docker-php-ext-enable xdebug; \
-    fi
+# RUN if [ "$(php -r 'echo PHP_MAJOR_VERSION;')" -lt "8" ]; then \
+#     pecl install xdebug-3.1.6 && docker-php-ext-enable xdebug; \
+#     elif [ "$(php -r 'echo PHP_MAJOR_VERSION;')" = "8" ] && [ "$(php -r 'echo PHP_MINOR_VERSION;')" -lt "3" ]; then \
+#     pecl install xdebug-3.2.2 && docker-php-ext-enable xdebug; \
+#     else \
+#     pecl install xdebug && docker-php-ext-enable xdebug; \
+#     fi
 
-COPY .devcontainer/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+# COPY .devcontainer/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
 # Wordpress
 ARG WP_VERSION=6.0
@@ -57,3 +60,7 @@ RUN wp config create \
     --path=/var/www/html \
     --allow-root \
     --skip-check
+
+# Permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/wp-content

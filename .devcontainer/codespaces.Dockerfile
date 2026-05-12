@@ -62,7 +62,6 @@ RUN sed -i '/\/\* Add any custom values between this line and the "stop editing"
     } \
     ' /var/www/html/wp-config.php
 
-
 # Permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/wp-content

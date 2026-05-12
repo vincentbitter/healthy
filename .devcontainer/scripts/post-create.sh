@@ -41,4 +41,7 @@ chown -R www-data:www-data /var/www/html
 
 # Add Healthy plugin
 echo "Linking Healthy plugin..."
-ln -sfn "$(pwd)/dist" /var/www/html/wp-content/plugins/healthy
+if [ -d /var/www/html/wp-content/plugins/healthy ]; then
+    ln -sfn "$(pwd)/dist" /var/www/html/wp-content/plugins/healthy
+fi
+

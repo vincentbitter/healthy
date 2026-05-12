@@ -36,7 +36,7 @@ class Page
 
     public function render()
     {
-        $path = plugin_dir_path(__DIR__ . '/../../') . $this->view;
+        $path = plugin_dir_path(__DIR__) . $this->view;
 
         if (! file_exists($path)) {
             /* translators: %s is the view file path */
