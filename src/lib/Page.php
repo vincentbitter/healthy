@@ -41,8 +41,8 @@ class Page
         if (! file_exists($path)) {
             /* translators: %s is the view file path */
             wp_die(sprintf(esc_html__("View not found: %s", 'healthy'), esc_html($this->view)));
+        } else {
+            include $path;
         }
-
-        include $path;
     }
 }
