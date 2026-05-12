@@ -23,7 +23,9 @@
             "extensions": [
                 "bmewburn.vscode-intelephense-client",
                 "xdebug.php-debug",
-                "ms-azuretools.vscode-docker"
+                "tenninebt.vscode-koverage",
+                "ryanluker.vscode-coverage-gutters",
+                "recca0120.vscode-phpunit"
             ]
         }
     }

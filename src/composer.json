@@ -3,7 +3,7 @@
     "description": "Healthy plugin for WordPress",
     "type": "wordpress-plugin",
     "scripts": {
-        "test": "phpunit --display-phpunit-deprecations -c ../tests/phpunit.xml.dist"
+        "test": "export XDEBUG_MODE=coverage && phpunit --display-errors --display-warnings --display-phpunit-deprecations --coverage-clover ../tests/coverage.xml -c ../tests/phpunit.xml.dist $PHPUNIT_ARGS"
     },
     "autoload": {
         "psr-4": {

@@ -3,4 +3,15 @@
         "src/vendor/php-stubs/wordpress-stubs"
     ],
     "intelephense.files.maxSize": 10000000,
+    "koverage.coverageCommand": "composer -d src test",
+    "koverage.coverageFilePaths": [
+        "tests/**"
+    ],
+    "coverage-gutters.coverageBaseDir": "tests/**",
+    "phpunit.phpunit": "${workspaceFolder}/src/vendor/bin/phpunit",
+    "phpunit.args": [
+        "--configuration ${workspaceFolder}/tests/phpunit.xml.dist"
+    ],
+    "phpunit.saveBeforeTest": true,
+    "phpunit.debuggerConfig": "Listen for Xdebug",
 }
