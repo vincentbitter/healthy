@@ -2,12 +2,17 @@
     "name": "vincentbitter/healthy",
     "description": "Healthy plugin for WordPress",
     "type": "wordpress-plugin",
+    "scripts": {
+        "test": "phpunit --display-phpunit-deprecations -c ../tests/phpunit.xml.dist"
+    },
     "autoload": {
         "psr-4": {
             "Healthy\\": "lib/"
         }
     },
     "require-dev": {
-        "php-stubs/wordpress-stubs": "^6.0"
+        "php-stubs/wordpress-stubs": "^6.0",
+        "phpunit/phpunit": "^13.1",
+        "brain/monkey": "^2.7"
     }
 }
