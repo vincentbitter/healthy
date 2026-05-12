@@ -11,30 +11,41 @@ const __dirname = path.dirname(__filename);
 const srcDir = path.join(__dirname, 'src');
 const distDir = path.join(__dirname, 'dist');
 
-// Determine dev dependencies from composer.json
-let devDeps = [];
-function getDevDeps() {
-    const composerJson = JSON.parse(
-        fs.readFileSync(path.join(srcDir, 'composer.json'), 'utf8')
-    );
-    devDeps = Object.keys(composerJson['require-dev'] || []);
-    console.log("Composer devDependencies loaded");
+function composerDumpAutoload(folder, prod) {
+    exec('composer dump-autoload' + (prod ? ' --optimize --no-dev' : ''), { cwd: folder }, (err, stdout, stderr) => {
+        if (err) console.error(stderr);
+        else console.log("Composer autoload updated: " + folder);
+    });
 }
-getDevDeps();
 
-// Watch composer file
+function composerDumpAutoloads() {
+    composerDumpAutoload(srcDir, false);
+    composerDumpAutoload(distDir, true);
+}
+
+function composerInstall(folder, prod) {
+    exec('composer install' + (prod ? ' --optimize-autoloader --no-dev' : ''), { cwd: folder }, (err, stdout, stderr) => {
+        if (err) console.error(stderr);
+        else console.log("Composer install completed: " + folder);
+    });
+}
+
+function syncComposer() {
+    fs.copyFileSync(path.join(srcDir, 'composer.json'), path.join(distDir, 'composer.json'));
+    composerInstall(distDir, true);
+}
+
+// Watch composer file: copy to dist and run composer install on dist
 function watchComposer() {
+    const debouncedSyncComposer = debounce(syncComposer, 1000);
     fs.watch(path.join(srcDir, 'composer.json'), (event, filename) => {
-        if (filename) {
-            console.log(`Composer file changed: ${filename}`);
-            getDevDeps();
-        }
+        console.log(`Composer file changed: ${filename}`);
+        debouncedSyncComposer();
     });
 
     console.log("Composer watching...");
 }
 
-// Clean dist
 function cleanDist() {
     if (!fs.existsSync(distDir)) {
         fs.mkdirSync(distDir, { recursive: true });
@@ -45,22 +56,9 @@ function cleanDist() {
         fs.rmSync(path.join(distDir, entry), { recursive: true, force: true });
     }
 
-    console.log("Dist cleaned");
+    console.log("Cleaned ./dist");
 }
 
-cleanDist();
-
-// Create new autoload files
-function dumpAutoload() {
-  exec('composer dump-autoload -o', { cwd: srcDir }, (err, stdout, stderr) => {
-    if (err) console.error(stderr);
-    else console.log("Composer autoload updated");
-  });
-}
-
-dumpAutoload();
-
-// Copy PHP files
 function copyPHP() {
     function copyRecursive(dir) {
         const entries = fs.readdirSync(dir, { withFileTypes: true });
@@ -70,14 +68,14 @@ function copyPHP() {
             const relPath = path.relative(srcDir, srcPath);
             const destPath = path.join(distDir, relPath);
 
-            // Skip devDependencies
-            if (relPath.startsWith("vendor/") && devDeps.includes(relPath.substring(7))) {
+            // Skip ./vendor directory
+            if (relPath.startsWith("vendor/")) {
                 continue;
             }
 
             if (entry.isDirectory()) {
                 copyRecursive(srcPath);
-            } else if (entry.name === 'composer.json' || entry.name === 'composer.lock' || entry.name.endsWith('.php')) {
+            } else if (entry.name.endsWith('.php')) {
                 fs.mkdirSync(path.dirname(destPath), { recursive: true });
                 fs.copyFileSync(srcPath, destPath);
             }
@@ -85,50 +83,56 @@ function copyPHP() {
     }
 
     copyRecursive(srcDir);
-    console.log("PHP copied");
+    console.log("PHP files copied");
 }
 
-// Initial copy
-copyPHP();
 
-// Watch PHP files
-function watchPHP() {
-    const debouncedDumpAutoload = debounce(dumpAutoload, 100);
-    const debouncedCopy = debounce(copyPHP, 200);
+function watchPHPFiles() {
+    const debouncedDumpAutoloads = debounce(composerDumpAutoloads, 1000);
+
+    function fileChanged(file) {
+        const destPath = path.join(distDir, path.relative(srcDir, file));
+        if (!fs.existsSync(path.dirname(destPath)))
+            fs.mkdirSync(path.dirname(destPath), { recursive: true });
+
+        fs.copyFileSync(file, path.join(distDir, path.relative(srcDir, file)));
+        if (file.startsWith(srcDir + "/lib/"))
+            debouncedDumpAutoloads();
+    }
+
     chokidar.watch(srcDir, {
         ignoreInitial: true,
         usePolling: true,
-        interval: 200
+        interval: 200,
+        ignored: (path, stats) => (stats?.isFile() && !path.endsWith('.php')) || path.startsWith(srcDir + "/vendor/")
     })
         .on('change', file => {
-            if (file.endsWith('.php')) {
-                console.log(`PHP changed: ${file}`);
-                if (file.startsWith(srcDir + "/lib/"))
-                    debouncedDumpAutoload();
-                debouncedCopy();
-            }
+            console.log(`File changed: ${file}`);
+            fileChanged(file);
         })
         .on('add', file => {
-            if (file.endsWith('.php')) {
-                console.log(`PHP added: ${file}`);
-                if (file.startsWith(srcDir + "/lib/"))
-                    debouncedDumpAutoload();
-                debouncedCopy();
-            }
+            console.log(`File added: ${file}`);
+            fileChanged(file);
         })
         .on('unlink', file => {
-            if (file.endsWith('.php')) {
-                console.log(`PHP removed: ${file}`);
-                if (file.startsWith(srcDir + "/lib/"))
-                    debouncedDumpAutoload();
-                removeFromDist(file);
+            console.log(`File removed: ${file}`);
+            const distPath = path.join(distDir, path.relative(srcDir, file));
+            if (fs.existsSync(distPath))
+                fs.rmSync(distPath, { force: true });
+            if (file.startsWith(srcDir + "/lib/"))
+                debouncedDumpAutoloads();
+        })
+        .on('unlinkDir', dir => {
+            console.log(`Directory removed: ${dir}`);
+            const distPath = path.join(distDir, path.relative(srcDir, dir));
+            if (fs.existsSync(distPath)) {
+                fs.rmSync(distPath, { force: true, recursive: true });
             }
         });
 
-    console.log("PHP watching...");
+    console.log("Watching files...");
 }
 
-// Debounce helper
 function debounce(fn, delay = 150) {
     let timer = null;
     return (...args) => {
@@ -137,18 +141,7 @@ function debounce(fn, delay = 150) {
     };
 }
 
-// Remove file from dist
-function removeFromDist(file) {
-    const relPath = path.relative(srcDir, file);
-    const distPath = path.join(distDir, relPath);
-
-    if (fs.existsSync(distPath)) {
-        fs.rmSync(distPath, { force: true });
-    }
-}
-
-// Build config
-const config = {
+const buildConfig = {
     entryPoints: [
         'src/admin.js'
     ],
@@ -158,17 +151,24 @@ const config = {
     target: 'es2017'
 };
 
-const watch = process.argv.includes('--watch');
+// Bootstrap
+cleanDist();
+composerInstall(srcDir, false);
+copyPHP();
+syncComposer();
 
-if (watch) {
+// Watch mode
+if (process.argv.includes('--watch')) {
     watchComposer();
-    watchPHP();
+    watchPHPFiles();
 
-    esbuild.context(config).then(ctx => {
+    esbuild.context(buildConfig).then(ctx => {
         ctx.watch();
         console.log("JS watching...");
     });
-} else {
-    await esbuild.build(config);
+}
+// Build mode
+else {
+    await esbuild.build(buildConfig);
     console.log("Build complete");
 }
