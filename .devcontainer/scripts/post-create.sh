@@ -2,10 +2,14 @@
 set -e
 echo "=== Post-create ==="
 
+# Install Playwright
+pnpm install
+pnpm exec playwright install --with-deps
+
 # Wait for MySQL to be ready
 if [ ! -f /var/www/html/wp-content/db.php ]; then
   echo "Check database connection..."
-  until wp db check --allow-root --path=/var/www/html; do
+  until sudo wp db check --allow-root --path=/var/www/html; do
       echo "Waiting for database to be ready..."
       sleep 3
   done
@@ -27,21 +31,21 @@ wp core install --allow-root \
   --admin_email=admin@example.com
 
 # Ensure plugin-check
-WP_VERSION=$(wp core version --allow-root --path=/var/www/html | tail -n 1)
+WP_VERSION=$(sudo wp core version --allow-root --path=/var/www/html | tail -n 1)
 if dpkg --compare-versions "$WP_VERSION" ge "6.3"; then
   echo "Installing plugin-check..."
-  wp plugin install plugin-check --activate --allow-root --path=/var/www/html
+  sudo wp plugin install plugin-check --activate --allow-root --path=/var/www/html
 else
     echo "Skipping plugin-check: WP version $WP_VERSION < 6.3"
 fi
 
 # Fix permissions
 echo "Setting permissions..."
-chown -R www-data:www-data /var/www/html
+sudo chown -R www-data:www-data /var/www/html
 
 # Add Healthy plugin
 echo "Linking Healthy plugin..."
 if [ -d /var/www/html/wp-content/plugins/healthy ]; then
-    ln -sfn "$(pwd)/dist" /var/www/html/wp-content/plugins/healthy
+    sudo ln -sfn "$(pwd)/dist" /var/www/html/wp-content/plugins/healthy
 fi
 

@@ -5,10 +5,12 @@
     "type": "module",
     "scripts": {
         "build": "node build.js",
-        "start": "node build.js --watch"
+        "start": "node build.js --watch",
+        "test-e2e": "playwright test --config=tests/e2e/_config/playwright.config.ts"
     },
     "devDependencies": {
-        "esbuild": "^0.20.0",
-        "chokidar": "^5.0.0"
+        "@playwright/test": "^1.60.0",
+        "chokidar": "^5.0.0",
+        "esbuild": "^0.20.0"
     }
 }

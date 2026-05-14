@@ -3,6 +3,7 @@ dist
 node_modules
 vendor
 /tests/.phpunit.cache
-/tests/coverage.xml
+/test-results
+/test-report
 
 devcontainer-lock.json

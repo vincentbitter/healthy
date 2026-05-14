@@ -16,7 +16,7 @@
     "remoteEnv": {
         "SITE_NAME": "Healthy"
     },
-    "postCreateCommand": "sudo -E bash .devcontainer/scripts/post-create.sh",
+    "postCreateCommand": "bash .devcontainer/scripts/post-create.sh",
     "postStartCommand": "bash .devcontainer/scripts/post-start.sh",
     "customizations": {
         "vscode": {
@@ -25,7 +25,8 @@
                 "xdebug.php-debug",
                 "tenninebt.vscode-koverage",
                 "ryanluker.vscode-coverage-gutters",
-                "recca0120.vscode-phpunit"
+                "recca0120.vscode-phpunit",
+                "ms-playwright.playwright"
             ]
         }
     }
