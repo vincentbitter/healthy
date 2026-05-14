@@ -59,33 +59,75 @@ function cleanDist() {
     console.log("Cleaned ./dist");
 }
 
-function copyPHP() {
-    function copyRecursive(dir) {
-        const entries = fs.readdirSync(dir, { withFileTypes: true });
+function copyRecursive(dir, ignored) {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
 
-        for (const entry of entries) {
-            const srcPath = path.join(dir, entry.name);
-            const relPath = path.relative(srcDir, srcPath);
-            const destPath = path.join(distDir, relPath);
+    for (const entry of entries) {
+        const srcPath = path.join(dir, entry.name);
+        const relPath = path.relative(srcDir, srcPath);
+        const destPath = path.join(distDir, relPath);
 
-            // Skip ./vendor directory
-            if (relPath.startsWith("vendor/")) {
-                continue;
-            }
+        if (ignored && ignored(relPath))
+            continue;
 
-            if (entry.isDirectory()) {
-                copyRecursive(srcPath);
-            } else if (entry.name.endsWith('.php')) {
-                fs.mkdirSync(path.dirname(destPath), { recursive: true });
-                fs.copyFileSync(srcPath, destPath);
-            }
+        if (entry.isDirectory()) {
+            copyRecursive(srcPath, ignored);
+        } else {
+            fs.mkdirSync(path.dirname(destPath), { recursive: true });
+            fs.copyFileSync(srcPath, destPath);
         }
     }
-
-    copyRecursive(srcDir);
-    console.log("PHP files copied");
 }
 
+function copyPublic() {
+    copyRecursive(srcDir + "/public/");
+    console.log("Public files copied");
+}
+
+function watchPublicFiles() {
+    function fileChanged(file) {
+        const destPath = path.join(distDir, path.relative(srcDir, file));
+        if (!fs.existsSync(path.dirname(destPath)))
+            fs.mkdirSync(path.dirname(destPath), { recursive: true });
+
+        fs.copyFileSync(file, path.join(distDir, path.relative(srcDir, file)));
+    }
+
+    chokidar.watch(srcDir, {
+        ignoreInitial: true,
+        usePolling: true,
+        interval: 500
+    })
+        .on('change', file => {
+            console.log(`File changed: ${file}`);
+            fileChanged(file);
+        })
+        .on('add', file => {
+            console.log(`File added: ${file}`);
+            fileChanged(file);
+        })
+        .on('unlink', file => {
+            console.log(`File removed: ${file}`);
+            const distPath = path.join(distDir, path.relative(srcDir, file));
+            if (fs.existsSync(distPath))
+                fs.rmSync(distPath, { force: true });
+        })
+        .on('unlinkDir', dir => {
+            console.log(`Directory removed: ${dir}`);
+            const distPath = path.join(distDir, path.relative(srcDir, dir));
+            if (fs.existsSync(distPath))
+                fs.rmSync(distPath, { force: true, recursive: true });
+        });
+
+    console.log("Watching Public files...");
+}
+
+function copyPHP() {
+    copyRecursive(srcDir,
+        (file) => (!fs.statSync(path.join(srcDir, file)).isDirectory() && !file.endsWith('.php'))
+            || ["public", "vendor"].includes(file));
+    console.log("PHP files copied");
+}
 
 function watchPHPFiles() {
     const debouncedDumpAutoloads = debounce(composerDumpAutoloads, 1000);
@@ -130,7 +172,7 @@ function watchPHPFiles() {
             }
         });
 
-    console.log("Watching files...");
+    console.log("Watching PHP files...");
 }
 
 function debounce(fn, delay = 150) {
@@ -155,12 +197,14 @@ const buildConfig = {
 cleanDist();
 composerInstall(srcDir, false);
 copyPHP();
+copyPublic();
 syncComposer();
 
 // Watch mode
 if (process.argv.includes('--watch')) {
     watchComposer();
     watchPHPFiles();
+    watchPublicFiles();
 
     esbuild.context(buildConfig).then(ctx => {
         ctx.watch();
