@@ -10,6 +10,6 @@
   <circle cx="30" cy="30" r="20" fill="url(#grad)" />
   <path d="M21.5 30 L22 30 L25 25 L28 35 L31 20 L34 40 L37 30 L37.7 30" stroke="white" stroke-width="1.5"
     stroke-linejoin="round" fill="none" />
-  <path d="M15 30 L22 29.2 L21.8 30.8" fill="white" />
-  <path d="M37.6 29.2 L37.3 30.8 L45 30" fill="white" />
+  <path d="M15 30 L21.9 29.2 L21.5 30.75" fill="white" />
+  <path d="M37.7 29.25 L37.3 30.8 L45 30" fill="white" />
 </svg>
