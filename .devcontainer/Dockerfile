@@ -47,6 +47,20 @@ RUN wp config create \
     --allow-root \
     --skip-check
 
+# Fix $_SERVER variables for Codespaces
+RUN sed -i '/\/\* Add any custom values between this line and the "stop editing" line\. \*\//a \
+    \
+    if (!empty($_SERVER["HTTP_X_FORWARDED_HOST"])) { \
+    $_SERVER["HTTP_HOST"] = $_SERVER["HTTP_X_FORWARDED_HOST"]; \
+    } \
+    \
+    if (!empty($_SERVER["HTTP_X_FORWARDED_PROTO"]) && $_SERVER["HTTP_X_FORWARDED_PROTO"] === "https") { \
+    $_SERVER["HTTPS"] = "on"; \
+    $_SERVER["SERVER_PORT"] = $_SERVER["HTTP_X_FORWARDED_PORT"] ?? 443; \
+    $_SERVER["REQUEST_SCHEME"] = "https"; \
+    } \
+    ' /var/www/html/wp-config.php
+
 # Permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/wp-content

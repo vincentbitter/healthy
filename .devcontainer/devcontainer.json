@@ -1,13 +1,9 @@
 {
     "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
-    "name": "Codespaces Latest",
-    "build": {
-        "dockerfile": "../codespaces.Dockerfile",
-        "args": {
-            "WP_VERSION": "latest",
-            "PHP_VERSION": "8"
-        }
-    },
+    "name": "Latest",
+    "workspaceFolder": "/workspace",
+    "dockerComposeFile": "../docker-compose.yaml",
+    "service": "wordpress",
     "features": {
         "ghcr.io/devcontainers/features/node:2.0.0": {
             "version": "26",
@@ -21,7 +17,7 @@
         "SITE_NAME": "Healthy"
     },
     "postCreateCommand": "bash .devcontainer/scripts/post-create.sh",
-    "postStartCommand": "bash .devcontainer/scripts/post-start.sh && sudo apache2ctl start",
+    "postStartCommand": "bash .devcontainer/scripts/post-start.sh",
     "customizations": {
         "vscode": {
             "extensions": [

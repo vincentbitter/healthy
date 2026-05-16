@@ -3,7 +3,7 @@ set -e
 echo "=== Post-create ==="
 
 # Install Playwright
-pnpm install
+pnpm install -y
 pnpm exec playwright install --with-deps
 
 # Wait for MySQL to be ready
@@ -42,10 +42,10 @@ fi
 # Fix permissions
 echo "Setting permissions..."
 sudo chown -R www-data:www-data /var/www/html
+sudo chown -R 1000:1000 ./dist
 
 # Add Healthy plugin
 echo "Linking Healthy plugin..."
 if [ -d /var/www/html/wp-content/plugins/healthy ]; then
     sudo ln -sfn "$(pwd)/dist" /var/www/html/wp-content/plugins/healthy
 fi
-
