@@ -11,7 +11,7 @@
         }
     },
     "require-dev": {
-        "php-stubs/wordpress-stubs": "^6.0",
+        "php-stubs/wordpress-stubs": "^6.9.1",
         "phpunit/phpunit": "^13.1.10",
         "brain/monkey": "^2.7"
     }
