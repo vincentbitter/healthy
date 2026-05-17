@@ -1,0 +1,16 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:recommended",
+        ":semanticCommits",
+        ":semanticCommitTypeAll(chore)"
+    ],
+    "rangeStrategy": "bump",
+    "labels": [
+        "dependencies"
+    ],
+    "gitAuthor": "Vincent Bitter <5149862+vincentbitter@users.noreply.github.com>",
+    "prHourlyLimit": 0,
+    "prConcurrentLimit": 0,
+    "dependencyDashboard": true
+}
