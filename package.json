@@ -11,6 +11,6 @@
     "devDependencies": {
         "@playwright/test": "^1.60.0",
         "chokidar": "^5.0.0",
-        "esbuild": "^0.20.0"
+        "esbuild": "^0.28.0"
     }
 }
