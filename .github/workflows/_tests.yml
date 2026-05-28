@@ -1,0 +1,169 @@
+name: Tests
+
+on:
+  workflow_call:
+    outputs:
+      unit-test-report:
+        description: Artifact name for unit test results
+        value: ${{ jobs.unit-tests.outputs.artifact }}
+      e2e-test-report:
+        description: Artifact name for E2E test results
+        value: ${{ jobs.e2e-tests.outputs.artifact }}
+
+jobs:
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    outputs:
+      artifact: unit-test-results-${{ github.run_id }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up PHP with Xdebug
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "latest"
+          coverage: xdebug
+          tools: composer
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v5
+        with:
+          path: src/vendor
+          key: composer-${{ hashFiles('src/composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist
+        working-directory: src
+
+      - name: Run unit tests
+        run: composer test
+        working-directory: src
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: unit-test-results-${{ github.run_id }}
+          path: test-report/unit/
+          retention-days: 30
+
+      - name: Publish unit test results
+        if: always()
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: test-report/unit/phpunit-junit.xml
+          check_name: Unit Test Results
+
+      - name: Code coverage summary
+        if: always()
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: test-report/unit/coverage.xml
+          badge: true
+          format: markdown
+          output: both
+          thresholds: "50 80"
+
+      - name: Add coverage to PR
+        if: always() && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v3
+        with:
+          recreate: true
+          path: code-coverage-results.md
+
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    outputs:
+      artifact: e2e-test-results-${{ github.run_id }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - name: Cache Composer dependencies (dist build)
+        uses: actions/cache@v5
+        with:
+          path: dist/vendor
+          key: composer-dist-${{ hashFiles('src/composer.lock') }}
+          restore-keys: composer-dist-
+
+      - name: Install JS dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Build plugin
+        run: node build.js
+
+      - name: Cache Docker layers
+        uses: actions/cache@v5
+        with:
+          path: /tmp/.buildx-cache
+          key: docker-${{ hashFiles('.devcontainer/Dockerfile') }}
+          restore-keys: docker-
+
+      - name: Start WordPress environment
+        run: docker compose up -d --build
+
+      - name: Wait for MariaDB
+        run: |
+          echo "Waiting for MariaDB to be ready..."
+          until docker exec healthy_db mysqladmin ping -h localhost --silent 2>/dev/null; do
+            sleep 2
+          done
+          echo "MariaDB is ready."
+
+      - name: Install WordPress
+        run: |
+          docker exec healthy_wp wp core install \
+            --allow-root \
+            --path=/var/www/html \
+            --url=http://localhost:8080 \
+            --title=Healthy \
+            --admin_user=admin \
+            --admin_password=admin \
+            --admin_email=admin@example.com
+
+      - name: Install wp-cli proxy
+        # Lets global-setup.ts call `wp` locally while it executes inside the container
+        run: |
+          sudo tee /usr/local/bin/wp > /dev/null << 'WRAPPER'
+          #!/bin/bash
+          docker exec healthy_wp wp "$@"
+          WRAPPER
+          sudo chmod +x /usr/local/bin/wp
+
+      - name: Run E2E tests
+        run: pnpm run test-e2e
+
+      - name: Stop WordPress environment
+        if: always()
+        run: docker compose down -v
+
+      - name: Upload E2E test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-test-results-${{ github.run_id }}
+          path: test-report/e2e/
+          retention-days: 30
+
+      - name: Publish E2E test results
+        if: always()
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: test-report/e2e/playwright-junit.xml
+          check_name: E2E Test Results
