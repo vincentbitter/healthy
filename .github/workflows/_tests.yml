@@ -62,39 +62,55 @@ jobs:
           files: test-report/unit/phpunit-junit.xml
           check_name: Unit Test Results
 
-      - name: Code coverage summary
+      - name: Parse code coverage
         if: always()
         run: |
           python3 - << 'PYEOF'
-          import xml.etree.ElementTree as ET, sys
+          import xml.etree.ElementTree as ET, sys, json
 
           try:
               root = ET.parse('test-report/unit/coverage.xml').getroot()
               m = root.find('.//project/metrics')
               total   = int(m.get('statements', 0))
               covered = int(m.get('coveredstatements', 0))
+              with open('coverage-data.json', 'w') as f:
+                  json.dump({'total': total, 'covered': covered}, f)
           except Exception as e:
               print(f"Could not parse coverage.xml: {e}", file=sys.stderr)
-              sys.exit(0)
-
-          pct = (covered / total * 100) if total > 0 else 0
-          icon = "🟢" if pct >= 80 else "🟡" if pct >= 50 else "🔴"
-
-          md = f"""## Code Coverage
-          {icon} **{pct:.1f}%** ({covered} / {total} statements covered)
-          """
-
-          with open('code-coverage-results.md', 'w') as f:
-              f.write(md)
-          print(md)
+              with open('coverage-data.json', 'w') as f:
+                  json.dump({'total': 0, 'covered': 0, 'error': str(e)}, f)
           PYEOF
 
-      - name: Add coverage to PR
-        if: always() && github.event_name == 'pull_request'
-        uses: marocchino/sticky-pull-request-comment@v3
+      - name: Publish code coverage check
+        if: always()
+        uses: actions/github-script@v9
         with:
-          recreate: true
-          path: code-coverage-results.md
+          script: |
+            const fs = require('fs');
+            const { total, covered, error } = JSON.parse(fs.readFileSync('coverage-data.json', 'utf8'));
+
+            let title, summary, conclusion;
+            if (error || total === 0) {
+              title = 'Coverage: N/A';
+              summary = error ? `Could not parse coverage report: ${error}` : 'No statements found.';
+              conclusion = 'neutral';
+            } else {
+              const pct = covered / total * 100;
+              const icon = pct >= 80 ? '🟢' : pct >= 50 ? '🟡' : '🔴';
+              title = `Coverage: ${pct.toFixed(1)}%`;
+              summary = `${icon} **${pct.toFixed(1)}%** — ${covered} of ${total} statements covered`;
+              conclusion = pct >= 50 ? 'success' : 'failure';
+            }
+
+            await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'Code Coverage',
+              head_sha: context.sha,
+              status: 'completed',
+              conclusion,
+              output: { title, summary }
+            });
 
   e2e-tests:
     name: E2E Tests
