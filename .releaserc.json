@@ -1,0 +1,39 @@
+{
+    "plugins": [
+        "@semantic-release/commit-analyzer",
+        "@semantic-release/release-notes-generator",
+        [
+            "@semantic-release/changelog",
+            {
+                "changelogFile": "CHANGELOG.md"
+            }
+        ],
+        [
+            "@semantic-release/exec",
+            {
+                "prepareCmd": "sed -i 's/Version: .*/Version: ${nextRelease.version}/' src/healthy.php && node build.js && cp -r dist healthy && zip -r healthy-${nextRelease.version}.zip healthy && rm -rf healthy"
+            }
+        ],
+        [
+            "@semantic-release/git",
+            {
+                "assets": [
+                    "CHANGELOG.md",
+                    "src/healthy.php"
+                ],
+                "message": "chore(release): ${nextRelease.version} [skip ci]"
+            }
+        ],
+        [
+            "@semantic-release/github",
+            {
+                "assets": [
+                    {
+                        "path": "healthy-*.zip",
+                        "label": "healthy-${nextRelease.version}.zip"
+                    }
+                ]
+            }
+        ]
+    ]
+}
