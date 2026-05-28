@@ -150,6 +150,12 @@ jobs:
           done
           echo "MariaDB is ready."
 
+      - name: Install plugin Composer dependencies
+        run: |
+          docker exec healthy_wp composer install \
+            --optimize-autoloader --no-dev \
+            --working-dir=/var/www/html/wp-content/plugins/healthy
+
       - name: Install WordPress
         run: |
           docker exec healthy_wp wp core install \
