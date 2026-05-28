@@ -54,4 +54,4 @@ jobs:
           GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
         run: |
           npx --yes semantic-release \
-            --branches main --prerelease beta'
+            --branches main --prerelease beta
