@@ -145,7 +145,7 @@ jobs:
       - name: Wait for MariaDB
         run: |
           echo "Waiting for MariaDB to be ready..."
-          until docker exec healthy_db mysqladmin ping -h localhost --silent 2>/dev/null; do
+          until docker exec healthy_db mariadb -uroot -proot -e "SELECT 1" > /dev/null 2>&1; do
             sleep 2
           done
           echo "MariaDB is ready."
