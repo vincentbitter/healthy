@@ -64,13 +64,30 @@ jobs:
 
       - name: Code coverage summary
         if: always()
-        uses: irongut/CodeCoverageSummary@v1.3.0
-        with:
-          filename: test-report/unit/coverage.xml
-          badge: true
-          format: markdown
-          output: both
-          thresholds: "50 80"
+        run: |
+          python3 - << 'PYEOF'
+          import xml.etree.ElementTree as ET, sys
+
+          try:
+              root = ET.parse('test-report/unit/coverage.xml').getroot()
+              m = root.find('.//project/metrics')
+              total   = int(m.get('statements', 0))
+              covered = int(m.get('coveredstatements', 0))
+          except Exception as e:
+              print(f"Could not parse coverage.xml: {e}", file=sys.stderr)
+              sys.exit(0)
+
+          pct = (covered / total * 100) if total > 0 else 0
+          icon = "🟢" if pct >= 80 else "🟡" if pct >= 50 else "🔴"
+
+          md = f"""## Code Coverage
+          {icon} **{pct:.1f}%** ({covered} / {total} statements covered)
+          """
+
+          with open('code-coverage-results.md', 'w') as f:
+              f.write(md)
+          print(md)
+          PYEOF
 
       - name: Add coverage to PR
         if: always() && github.event_name == 'pull_request'
