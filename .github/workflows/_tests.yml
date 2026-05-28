@@ -10,6 +10,11 @@ on:
         description: Artifact name for E2E test results
         value: ${{ jobs.e2e-tests.outputs.artifact }}
 
+permissions:
+  checks: write
+  contents: read
+  pull-requests: write
+
 jobs:
   unit-tests:
     name: Unit Tests
