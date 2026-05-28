@@ -1,0 +1,14 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  checks: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  tests:
+    uses: ./.github/workflows/_tests.yml

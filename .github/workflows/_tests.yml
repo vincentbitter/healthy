@@ -1,0 +1,215 @@
+name: Tests
+
+on:
+  workflow_call:
+    outputs:
+      unit-test-report:
+        description: Artifact name for unit test results
+        value: ${{ jobs.unit-tests.outputs.artifact }}
+      e2e-test-report:
+        description: Artifact name for E2E test results
+        value: ${{ jobs.e2e-tests.outputs.artifact }}
+
+permissions:
+  checks: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    outputs:
+      artifact: unit-test-results-${{ github.run_id }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up PHP with Xdebug
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "latest"
+          coverage: xdebug
+          tools: composer
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v5
+        with:
+          path: src/vendor
+          key: composer-${{ hashFiles('src/composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist
+        working-directory: src
+
+      - name: Run unit tests
+        run: composer test
+        working-directory: src
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: unit-test-results-${{ github.run_id }}
+          path: test-report/unit/
+          retention-days: 30
+
+      - name: Publish unit test results
+        if: always()
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: test-report/unit/phpunit-junit.xml
+          check_name: Unit Test Results
+
+      - name: Parse code coverage
+        if: always()
+        run: |
+          python3 - << 'PYEOF'
+          import xml.etree.ElementTree as ET, sys, json
+
+          try:
+              root = ET.parse('test-report/unit/coverage.xml').getroot()
+              m = root.find('.//project/metrics')
+              total   = int(m.get('statements', 0))
+              covered = int(m.get('coveredstatements', 0))
+              with open('coverage-data.json', 'w') as f:
+                  json.dump({'total': total, 'covered': covered}, f)
+          except Exception as e:
+              print(f"Could not parse coverage.xml: {e}", file=sys.stderr)
+              with open('coverage-data.json', 'w') as f:
+                  json.dump({'total': 0, 'covered': 0, 'error': str(e)}, f)
+          PYEOF
+
+      - name: Publish code coverage check
+        if: always()
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const fs = require('fs');
+            const { total, covered, error } = JSON.parse(fs.readFileSync('coverage-data.json', 'utf8'));
+
+            let title, summary, conclusion;
+            if (error || total === 0) {
+              title = 'Coverage: N/A';
+              summary = error ? `Could not parse coverage report: ${error}` : 'No statements found.';
+              conclusion = 'neutral';
+            } else {
+              const pct = covered / total * 100;
+              const icon = pct >= 80 ? '🟢' : pct >= 50 ? '🟡' : '🔴';
+              title = `Coverage: ${pct.toFixed(1)}%`;
+              summary = `${icon} **${pct.toFixed(1)}%** — ${covered} of ${total} statements covered`;
+              conclusion = pct >= 50 ? 'success' : 'failure';
+            }
+
+            await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'Code Coverage',
+              head_sha: context.sha,
+              status: 'completed',
+              conclusion,
+              output: { title, summary }
+            });
+
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    outputs:
+      artifact: e2e-test-results-${{ github.run_id }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: latest
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - name: Cache Composer dependencies (dist build)
+        uses: actions/cache@v5
+        with:
+          path: dist/vendor
+          key: composer-dist-${{ hashFiles('src/composer.lock') }}
+          restore-keys: composer-dist-
+
+      - name: Install JS dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Build plugin
+        run: node build.js
+
+      - name: Cache Docker layers
+        uses: actions/cache@v5
+        with:
+          path: /tmp/.buildx-cache
+          key: docker-${{ hashFiles('.devcontainer/Dockerfile') }}
+          restore-keys: docker-
+
+      - name: Start WordPress environment
+        run: docker compose up -d --build
+
+      - name: Wait for MariaDB
+        run: |
+          echo "Waiting for MariaDB to be ready..."
+          until docker exec healthy_db mariadb -uroot -proot -e "SELECT 1" > /dev/null 2>&1; do
+            sleep 2
+          done
+          echo "MariaDB is ready."
+
+      - name: Install plugin Composer dependencies
+        run: |
+          docker exec healthy_wp composer install \
+            --optimize-autoloader --no-dev \
+            --working-dir=/var/www/html/wp-content/plugins/healthy
+
+      - name: Install WordPress
+        run: |
+          docker exec healthy_wp wp core install \
+            --allow-root \
+            --path=/var/www/html \
+            --url=http://localhost:8080 \
+            --title=Healthy \
+            --admin_user=admin \
+            --admin_password=admin \
+            --admin_email=admin@example.com
+
+      - name: Install wp-cli proxy
+        # Lets global-setup.ts call `wp` locally while it executes inside the container
+        run: |
+          sudo tee /usr/local/bin/wp > /dev/null << 'WRAPPER'
+          #!/bin/bash
+          docker exec healthy_wp wp "$@"
+          WRAPPER
+          sudo chmod +x /usr/local/bin/wp
+
+      - name: Run E2E tests
+        run: pnpm run test-e2e
+
+      - name: Stop WordPress environment
+        if: always()
+        run: docker compose down -v
+
+      - name: Upload E2E test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-test-results-${{ github.run_id }}
+          path: test-report/e2e/
+          retention-days: 30
+
+      - name: Publish E2E test results
+        if: always()
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: test-report/e2e/playwright-junit.xml
+          check_name: E2E Test Results
