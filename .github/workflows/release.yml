@@ -60,4 +60,5 @@ jobs:
           GIT_COMMITTER_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
         run: |
           npx --yes semantic-release \
-            --branches '["release/v[0-9]*.[0-9]*.[0-9]*", {"name":"main","prerelease":true}]'
+            --branches '[{"name":"release/v*.*.*"}, {"name":"main","prerelease":true}]'
+
