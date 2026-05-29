@@ -3,6 +3,9 @@
         {
             "name": "main",
             "prerelease": "beta"
+        },
+        {
+            "name": "release"
         }
     ],
     "plugins": [
