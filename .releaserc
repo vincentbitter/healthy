@@ -5,7 +5,7 @@
             "prerelease": true
         },
         {
-            "name": "main"
+            "name": "release"
         }
     ],
     "plugins": [
