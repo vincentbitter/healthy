@@ -35,7 +35,12 @@ jobs:
           composer global require squizlabs/php_codesniffer wp-coding-standards/wpcs
 
       - name: Check coding standards
-        run: phpcs --standard=phpcs.xml --report=checkstyle --extensions=php src | cs2pr
+        id: phpcs
+        run: phpcs --standard=phpcs.xml --extensions=php --report-full --report-checkstyle=./phpcs-report.xml src
+
+      - name: Show PHPCS results in PR
+        if: ${{ always() && steps.phpcs.outcome == 'failure' }}
+        run: cs2pr ./phpcs-report.xml
 
   unit-tests:
     name: Unit Tests
