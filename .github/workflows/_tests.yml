@@ -36,6 +36,7 @@ jobs:
         run: |
           composer global require squizlabs/php_codesniffer wp-coding-standards/wpcs
           phpcs --config-set installed_paths ~/.composer/vendor/wp-coding-standards/wpcs
+        working-directory: src
 
       - name: Cache Composer dependencies
         uses: actions/cache@v5
