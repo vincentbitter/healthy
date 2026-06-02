@@ -6,7 +6,6 @@
  *
  * @package Healthy
  */
-
 if ( ! defined( 'ABSPATH' ) ) {
 	define( 'ABSPATH', realpath( __DIR__ . '/../../../' ) );
 }
