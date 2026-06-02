@@ -1,6 +1,13 @@
 <?xml version="1.0"?>
-<ruleset name="Healthy Plugin">
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Plugin" xsi:noNamespaceSchemaLocation="phpcs.xsd">
     <rule ref="WordPress-Extra"/>
     <rule ref="WordPress-Docs"/>
     <rule ref="WordPress-Core"/>
+
+    <file>src</file>
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+
+    <rule ref="WordPress.Files.FileName">
+        <exclude-pattern>*/lib/*</exclude-pattern>
+    </rule>
 </ruleset>
