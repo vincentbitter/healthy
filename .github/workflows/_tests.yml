@@ -30,7 +30,12 @@ jobs:
         with:
           php-version: "latest"
           coverage: xdebug
-          tools: composer
+          tools: composer, cs2pr
+
+      - name: Install PHPCS + WordPress CS
+        run: |
+          composer global require squizlabs/php_codesniffer wp-coding-standards/wpcs
+          phpcs --config-set installed_paths ~/.composer/vendor/wp-coding-standards/wpcs
 
       - name: Cache Composer dependencies
         uses: actions/cache@v5
@@ -42,6 +47,10 @@ jobs:
       - name: Install PHP dependencies
         run: composer install --no-interaction --prefer-dist
         working-directory: src
+
+      - name: Check coding standards
+        run: |
+          phpcs --standard=phpcs.xml --report=checkstyle --extensions=php src | cs2pr
 
       - name: Run unit tests
         run: composer test
