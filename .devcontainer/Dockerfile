@@ -21,6 +21,9 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
+# Disable Xdebug logs for CLI
+RUN echo "xdebug.log_level=0" >> /usr/local/etc/php/conf.d/xdebug.ini
+
 # Wordpress
 ARG WP_VERSION=6.0
 RUN curl -o wordpress.tar.gz https://wordpress.org/wordpress-${WP_VERSION}.tar.gz \

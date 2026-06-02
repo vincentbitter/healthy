@@ -26,7 +26,8 @@
                 "tenninebt.vscode-koverage",
                 "ryanluker.vscode-coverage-gutters",
                 "recca0120.vscode-phpunit",
-                "ms-playwright.playwright"
+                "ms-playwright.playwright",
+                "johnrdorazio.vscode-phpcs"
             ]
         }
     }

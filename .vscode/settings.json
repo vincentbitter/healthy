@@ -1,4 +1,5 @@
 {
+    "intelephense.format.enable": false,
     "intelephense.environment.includePaths": [
         "src/vendor/php-stubs/wordpress-stubs"
     ],
@@ -14,5 +15,7 @@
     ],
     "phpunit.saveBeforeTest": true,
     "phpunit.debuggerConfig": "Listen for Xdebug",
-    "phpunit.xdebugPort": 9003
+    "phpunit.xdebugPort": 9003,
+    "phpcs.executablePath": "src/vendor/bin/phpcs",
+    "phpcs.phpcbfOnSave": true
 }
