@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Plugin Name: Healthy
  * Plugin URI: https://github.com/vincentbitter/healthy
@@ -14,8 +13,8 @@
  * @package Healthy
  */
 
-if (!defined('ABSPATH')) {
-    exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
 
 require __DIR__ . '/vendor/autoload.php';
@@ -23,17 +22,20 @@ require __DIR__ . '/vendor/autoload.php';
 use Healthy\Page;
 use Healthy\Script;
 
-(new Page('pages/settings.php'))
-    ->register_options_page(
-        'Healthy',
-        'Healthy',
-        'manage_options',
-        'healthy-settings'
-    );
+( new Page( 'pages/settings.php' ) )
+	->register_options_page(
+		'Healthy',
+		'Healthy',
+		'manage_options',
+		'healthy-settings'
+	);
 
-(new Script('healthy-admin', 'admin.js', '1.0', true))
-    ->localize('HealthyConfig', [
-        'checkUrl' => plugins_url('live.php', __FILE__),
-    ])
-    ->translations('healthy')
-    ->register();
+( new Script( 'healthy-admin', 'admin.js', '1.0', true ) )
+	->localize(
+		'HealthyConfig',
+		array(
+			'checkUrl' => plugins_url( 'live.php', __FILE__ ),
+		)
+	)
+	->translations( 'healthy' )
+	->register();
