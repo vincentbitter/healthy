@@ -13,6 +13,12 @@
     "require-dev": {
         "php-stubs/wordpress-stubs": "^7.0.0",
         "phpunit/phpunit": "^13.1.13",
-        "brain/monkey": "^2.7"
+        "brain/monkey": "^2.7",
+        "wp-coding-standards/wpcs": "^3.3"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     }
 }

@@ -21,7 +21,13 @@
         [
             "@semantic-release/exec",
             {
-                "prepareCmd": "sed -i 's/Version: .*/Version: ${nextRelease.version}/' src/healthy.php && node build.js && cp -r dist healthy && zip -r healthy-${nextRelease.version}.zip healthy && rm -rf healthy"
+                "prepareCmd": "sed -i 's/Version: .*/Version: ${nextRelease.version}/' src/healthy.php && sed -i 's/Stable tag: .*/Stable tag: ${nextRelease.version}/' src/readme.txt"
+            }
+        ],
+        [
+            "@semantic-release/exec",
+            {
+                "prepareCmd": "node build.js && cp -r dist healthy && zip -r healthy-${nextRelease.version}.zip healthy && rm -rf healthy"
             }
         ],
         [
