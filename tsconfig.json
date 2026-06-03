@@ -5,6 +5,7 @@
         ]
     },
     "include": [
-        "./**/*.ts"
+        "./**/*.ts",
+        "src/pages/settings.js"
     ]
 }

@@ -21,7 +21,7 @@
         [
             "@semantic-release/exec",
             {
-                "prepareCmd": "sed -i 's/Version: .*/Version: ${nextRelease.version}/' src/healthy.php && sed -i 's/Stable tag: .*/Stable tag: ${nextRelease.version}/' src/readme.txt"
+                "prepareCmd": "sed -i 's/Version: .*/Version: ${nextRelease.version}/' src/healthy.php && sed -i \"s/define( 'HEALTHY_VERSION', '.*' );/define( 'HEALTHY_VERSION', '${nextRelease.version}' )/\" src/healthy.php && sed -i 's/Stable tag: .*/Stable tag: ${nextRelease.version}/' src/readme.txt"
             }
         ],
         [
