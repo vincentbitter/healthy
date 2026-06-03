@@ -17,6 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+define( 'HEALTHY_VERSION', '1.0.0' );
+
 require __DIR__ . '/vendor/autoload.php';
 
 use Healthy\Page;
@@ -30,7 +32,7 @@ use Healthy\Script;
 		'healthy-settings'
 	);
 
-( new Script( 'healthy-admin', 'admin.js', '1.0', true ) )
+( new Script( 'healthy-admin', 'public/js/admin.js', HEALTHY_VERSION, true ) )
 	->localize(
 		'HealthyConfig',
 		array(

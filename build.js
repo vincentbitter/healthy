@@ -80,7 +80,8 @@ function copyRecursive(dir, ignored) {
 }
 
 function copyPublic() {
-    copyRecursive(srcDir + "/public/");
+    copyRecursive(path.join(srcDir, "public"),
+        (file) => file.endsWith('.ts'));
     console.log("Public files copied");
 }
 
@@ -93,10 +94,11 @@ function watchPublicFiles() {
         fs.copyFileSync(file, path.join(distDir, path.relative(srcDir, file)));
     }
 
-    chokidar.watch(srcDir, {
+    chokidar.watch(path.join(srcDir, "public"), {
         ignoreInitial: true,
         usePolling: true,
-        interval: 500
+        interval: 500,
+        ignored: (val, stats) => (stats?.isFile() && (val.endsWith('.ts') || val.endsWith('.php'))) || val.startsWith(path.join(srcDir, "/vendor/"))
     })
         .on('change', file => {
             console.log(`File changed: ${file}`);
@@ -124,7 +126,7 @@ function watchPublicFiles() {
 
 function copyPHP() {
     copyRecursive(srcDir,
-        (file) => (!fs.statSync(path.join(srcDir, file)).isDirectory() && !file.endsWith('.php'))
+        (file) => (!fs.statSync(path.join(srcDir, file)).isDirectory() && !file.endsWith('.php') && file !== 'readme.txt')
             || ["public", "vendor"].includes(file));
     console.log("PHP files copied");
 }
@@ -146,7 +148,7 @@ function watchPHPFiles() {
         ignoreInitial: true,
         usePolling: true,
         interval: 200,
-        ignored: (path, stats) => (stats?.isFile() && !path.endsWith('.php')) || path.startsWith(srcDir + "/vendor/")
+        ignored: (val, stats) => (stats?.isFile() && !val.endsWith('.php') && val !== path.join(srcDir, "readme.txt")) || val.startsWith(path.join(srcDir, '/vendor/'))
     })
         .on('change', file => {
             console.log(`File changed: ${file}`);
@@ -185,12 +187,15 @@ function debounce(fn, delay = 150) {
 
 const buildConfig = {
     entryPoints: [
-        'src/admin.js'
+        'src/public/js/admin.ts'
     ],
     bundle: true,
-    outdir: 'dist',
-    sourcemap: true,
-    target: 'es2017'
+    outdir: 'dist/public/js',
+    target: 'es2017',
+    loader: {
+        '.ts': 'ts',
+        '.js': 'js'
+    }
 };
 
 // Bootstrap
@@ -206,13 +211,13 @@ if (process.argv.includes('--watch')) {
     watchPHPFiles();
     watchPublicFiles();
 
-    esbuild.context(buildConfig).then(ctx => {
+    esbuild.context({ ...buildConfig, ...{ sourcemap: true } }).then(ctx => {
         ctx.watch();
         console.log("JS watching...");
     });
 }
 // Build mode
 else {
-    await esbuild.build(buildConfig);
+    await esbuild.build({ ...buildConfig, ... { minify: true } });
     console.log("Build complete");
 }
