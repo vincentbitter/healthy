@@ -1,3 +1,10 @@
+## [1.0.1-beta.1](https://github.com/vincentbitter/healthy/compare/v1.0.0...v1.0.1-beta.1) (2026-06-03)
+
+
+### Bug Fixes
+
+* Health check test not working on admin dashboard. ([57872c4](https://github.com/vincentbitter/healthy/commit/57872c4399e1f675c69106dc2a0cb544835a8f0b))
+
 # 1.0.0 (2026-05-31)
 
 
