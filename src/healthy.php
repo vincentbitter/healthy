@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'HEALTHY_VERSION', '1.0.1-beta.1' )
+define( 'HEALTHY_VERSION', '1.0.1-beta.1' );
 
 require __DIR__ . '/vendor/autoload.php';
 
