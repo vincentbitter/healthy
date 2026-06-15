@@ -5,7 +5,7 @@
     "dockerComposeFile": "../docker-compose.yaml",
     "service": "wordpress",
     "features": {
-        "ghcr.io/devcontainers/features/node:2.0.0": {
+        "ghcr.io/devcontainers/features/node:2.1.0": {
             "version": "26.3.0",
             "pnpm": "true"
         }
