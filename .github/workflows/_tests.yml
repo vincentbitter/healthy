@@ -59,7 +59,7 @@ jobs:
           tools: composer
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: src/vendor
           key: composer-${{ hashFiles('src/composer.lock') }}
@@ -159,7 +159,7 @@ jobs:
           cache: pnpm
 
       - name: Cache Composer dependencies (dist build)
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: dist/vendor
           key: composer-dist-${{ hashFiles('src/composer.lock') }}
@@ -175,7 +175,7 @@ jobs:
         run: node build.js
 
       - name: Cache Docker layers
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: /tmp/.buildx-cache
           key: docker-${{ hashFiles('.devcontainer/Dockerfile') }}
