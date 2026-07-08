@@ -13,7 +13,7 @@
         "@semantic-release/changelog": "^6.0.3",
         "@semantic-release/exec": "^7.1.0",
         "@semantic-release/git": "^10.0.1",
-        "@types/node": "^25.9.4",
+        "@types/node": "^25.9.5",
         "chokidar": "^5.0.0",
         "esbuild": "^0.28.1",
         "semantic-release": "^25.0.5"
