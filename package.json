@@ -16,6 +16,6 @@
         "@types/node": "^25.9.5",
         "chokidar": "^5.0.0",
         "esbuild": "^0.28.1",
-        "semantic-release": "^25.0.7"
+        "semantic-release": "^25.0.8"
     }
 }
