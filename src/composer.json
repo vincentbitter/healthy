@@ -14,7 +14,7 @@
         "php-stubs/wordpress-stubs": "^7.0.1",
         "phpunit/phpunit": "^13.2.5",
         "brain/monkey": "^2.7",
-        "wp-coding-standards/wpcs": "^3.4.0"
+        "wp-coding-standards/wpcs": "^3.4.1"
     },
     "config": {
         "allow-plugins": {
