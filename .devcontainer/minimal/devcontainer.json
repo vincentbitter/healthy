@@ -9,7 +9,7 @@
     "service": "wordpress",
     "features": {
         "ghcr.io/devcontainers/features/node:2.0.0": {
-            "version": "26",
+            "version": "26.8.1",
             "pnpm": "true"
         }
     },
