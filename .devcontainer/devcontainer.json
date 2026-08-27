@@ -6,7 +6,7 @@
     "service": "wordpress",
     "features": {
         "ghcr.io/devcontainers/features/node:2.1.0": {
-            "version": "26.7.0",
+            "version": "26.8.1",
             "pnpm": "true"
         }
     },
