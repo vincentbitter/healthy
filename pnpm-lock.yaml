@@ -24,8 +24,8 @@ importers:
         specifier: ^25.9.5
         version: 25.9.5
       chokidar:
-        specifier: ^5.0.0
-        version: 5.0.0
+        specifier: ^6.0.0
+        version: 6.0.0
       esbuild:
         specifier: ^0.28.1
         version: 0.28.1
@@ -425,9 +425,9 @@ packages:
     resolution: {integrity: sha512-kWWXztvZ5SBQV+eRgKFeh8q5sLuZY2+8WUIzlxWVTg+oGwY14qylx1KbKzHd8P6ZYkAg0xyIDU9JMHhyJMZ1jw==}
     engines: {node: '>=10'}
 
-  chokidar@5.0.0:
-    resolution: {integrity: sha512-TQMmc3w+5AxjpL8iIiwebF73dRDF4fBIieAqGn9RGCWaEVwQ6Fb2cGe31Yns0RRIzii5goJ1Y7xbMwo1TxMplw==}
-    engines: {node: '>= 20.19.0'}
+  chokidar@6.0.0:
+    resolution: {integrity: sha512-Ec2Z7wpcKBiMpR7DxteoqS/sq5G5d2A4fpxzPv6+fD7xNNdrTghn7L11YwV5EN1B3i72Erc3XVT5FkWIDx90+A==}
+    engines: {node: '>= 22.22'}
 
   clean-stack@2.2.0:
     resolution: {integrity: sha512-4diC9HaTE+KRAMWhDhrGOECgWZxoevMc5TlkObMqNSsVU62PYzXZ/SMTjzyGAFF1YusgxGcSWTEXBhp0CPwQ1A==}
@@ -1139,8 +1139,8 @@ packages:
   readable-stream@2.3.8:
     resolution: {integrity: sha512-8p0AUk4XODgIewSi0l8Epjs+EVnWiK7NoDIEGU0HhE7+ZyY8D1IMY7odu5lRrFXGg71L15KG8QrPmum45RTtdA==}
 
-  readdirp@5.0.0:
-    resolution: {integrity: sha512-9u/XQ1pvrQtYyMpZe7DXKv2p5CNvyVwzUB6uhLAnQwHMSgKMBR62lc7AHljaeteeHXn11XTAaLLUVZYVZyuRBQ==}
+  readdirp@5.1.1:
+    resolution: {integrity: sha512-Kko+Y5XQ6fM+Ce3dq3m9YGxnacYZYl9cA1wZjaF3Vbry2L3i1qVg8+CAgNPsXRArPMUMCaOR7oa9Nqntc43JKA==}
     engines: {node: '>= 20.19.0'}
 
   registry-auth-token@5.1.1:
@@ -1800,9 +1800,9 @@ snapshots:
 
   char-regex@1.0.2: {}
 
-  chokidar@5.0.0:
+  chokidar@6.0.0:
     dependencies:
-      readdirp: 5.0.0
+      readdirp: 5.1.1
 
   clean-stack@2.2.0: {}
 
@@ -2451,7 +2451,7 @@ snapshots:
       string_decoder: 1.1.1
       util-deprecate: 1.0.2
 
-  readdirp@5.0.0: {}
+  readdirp@5.1.1: {}
 
   registry-auth-token@5.1.1:
     dependencies:
