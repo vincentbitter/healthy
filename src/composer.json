@@ -13,7 +13,7 @@
     "require-dev": {
         "php-stubs/wordpress-stubs": "^7.0.1",
         "phpunit/phpunit": "^13.3.0",
-        "brain/monkey": "^2.7",
+        "brain/monkey": "^2.8.0",
         "wp-coding-standards/wpcs": "^3.4.1"
     },
     "config": {
